@@ -1,1 +1,1 @@
-# COS738_BuscaEMineracaoDeTexto
+# COS738 - Busca e Mineração de Texto
