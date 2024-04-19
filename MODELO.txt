@@ -1,0 +1,34 @@
+DESCRIÇÃO DO FORMATO DO MODELO VETORIAL
+
+O modelo vetorial é armazenado em formato JSON e possui a seguinte estrutura:
+
+{
+    "idf": {
+        "termo1": idf_termo1,
+        "termo2": idf_termo2,
+        ...
+    },
+    "tf_idf": {
+        "documento1": {
+            "termo1": tf_idf_termo1_doc1,
+            "termo2": tf_idf_termo2_doc1,
+            ...
+        },
+        "documento2": {
+            "termo1": tf_idf_termo1_doc2,
+            "termo2": tf_idf_termo2_doc2,
+            ...
+        },
+        ...
+    },
+    "norm": {
+        "documento1": norm_doc1,
+        "documento2": norm_doc2,
+        ...
+    }
+}
+
+Onde:
+- idf: Armazena o valor do IDF (Inverse Document Frequency) para cada termo no conjunto de documentos.
+- tf_idf: Armazena o valor do TF-IDF (Term Frequency - Inverse Document Frequency) para cada termo em cada documento.
+- norm: Armazena o valor da norma euclidiana para cada documento.
