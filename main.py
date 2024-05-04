@@ -2,6 +2,7 @@ from ProcessadorDeConsultas import PC
 from GeradorListaInvertida import GLI
 from Indexador import INDEX
 from Buscador import BUSCA
+from Avaliacao import AVALIA
 
 import time
 
@@ -16,6 +17,7 @@ if __name__ == "__main__":
     GLI() # GERADOR DE LISTA INVERTIDA
     INDEX() # INDEXADOR
     BUSCA() # BUSCADOR
+    AVALIA() #AVALIAÇÃO
     fim = time.time()
     logger.debug('----------------------------------------------------------------------------')
     logger.debug(f'Tempo total de execução: {fim-ini:.2f}s')

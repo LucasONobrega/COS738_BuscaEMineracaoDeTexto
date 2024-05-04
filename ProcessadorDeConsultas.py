@@ -15,19 +15,24 @@ from lxml import etree
 import nltk
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
-from nltk.stem import WordNetLemmatizer
+from nltk.stem import PorterStemmer
 
 nltk.download('punkt', quiet=True)
 nltk.download('stopwords', quiet=True)
-nltk.download('wordnet', quiet=True)
+
+bool_stemmer = False
 
 # Ler um arquivo de configuração
 def read_config(config_file):
+    global bool_stemmer
     logger.debug(f'Lendo arquivo de configuração ({config_file})')
     with open(config_file, 'r') as file:
         for line in file:
             line = line.strip()
-            if line.startswith('LEIA'):
+            if line.startswith('STEMMER'):
+                bool_stemmer = True
+            
+            elif line.startswith('LEIA'):
                 file = (line.split('=')[1])[1:-1]
                 xml = read_xml(file)
 
@@ -43,7 +48,7 @@ def read_config(config_file):
 def read_xml(xml_file):
     logger.debug(f'Lendo arquivo XML ({xml_file})')
     parser = etree.XMLParser(dtd_validation=True)
-    tree = etree.parse(f'data/{xml_file}', parser)
+    tree = etree.parse(f'{xml_file}', parser)
     dict = xmltodict.parse(etree.tostring(tree))
     len_dict = len(dict['FILEQUERY']['QUERY'])
     logger.debug(f'Total de consultas em {xml_file}: {len_dict}')
@@ -62,6 +67,7 @@ def read_xml(xml_file):
 def remove_stop_words(tokens): 
     stop_words = set(stopwords.words('english'))
     stop_words.add('patient')
+    stop_words.add('patients')
     ft = [t for t in tokens if t.lower() not in stop_words] 
     return ft
 
@@ -74,10 +80,10 @@ def remove_len(tokens):
     ft = [t for t in tokens if len(t)>=5] 
     return ft
 
-# Lemmatization
-def lemmatizer(tokens):
-    lt = [WordNetLemmatizer().lemmatize(t) for t in tokens]
-    return lt
+# Porter Stemming
+def stemming(tokens):
+    st = [PorterStemmer().stem(t) for t in tokens]
+    return st
 
 # Upper
 def upper(tokens):
@@ -94,9 +100,15 @@ def csv_consultas(xml,file):
     # remover pontuação, tokenização, lematização, remover stopwords, remover tokens de tamanho menor que 5, maiúscula
     df['QueryText'] = df['QueryText'].apply(remove_punct)
     df['QueryText'] = df['QueryText'].apply(word_tokenize)
-    df['QueryText'] = df['QueryText'].apply(lemmatizer)
     df['QueryText'] = df['QueryText'].apply(remove_stop_words)
     df['QueryText'] = df['QueryText'].apply(remove_len)
+    
+    if(bool_stemmer == True):
+        file += '-STEMMER'
+        df['QueryText'] = df['QueryText'].apply(stemming) 
+    else:
+        file += '-NOSTEMMER'
+
     df['QueryText'] = df['QueryText'].apply(upper)
 
     logger.debug(f'Salvando arquivo {file}.csv')

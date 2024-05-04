@@ -98,13 +98,12 @@ def query_results(similarities):
     query_results = []
     i = 0
     for doc,sim in similarities.items():
+        if(sim < 0.1):
+            break
+        
         i += 1
         query_results.append((i, doc, sim))
         
-        # lista de resultados terá tamanho 10
-        if(i == 10):
-            break
-
     return query_results
 
 def BUSCA():

@@ -16,20 +16,25 @@ from lxml import etree
 import nltk
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
-from nltk.stem import WordNetLemmatizer
+from nltk.stem import PorterStemmer
 
 nltk.download('punkt', quiet=True)
 nltk.download('stopwords', quiet=True)
-nltk.download('wordnet', quiet=True)
+
+bool_stemmer = False
 
 # Ler um arquivo de configuração
 def read_config(config_file):
+    global bool_stemmer
     logger.debug(f'Lendo arquivo de configuração ({config_file})')
     list_xml = []
     with open(config_file, 'r') as file:
         for line in file:
             line = line.strip()
-            if line.startswith('LEIA'):
+            if line.startswith('STEMMER'):
+                bool_stemmer = True
+            
+            elif line.startswith('LEIA'):
                 file = (line.split('=')[1])[1:-1]
                 list_xml.append(read_xml(file))
 
@@ -41,7 +46,7 @@ def read_config(config_file):
 def read_xml(xml_file):
     logger.debug(f'Lendo arquivo XML ({xml_file})')
     parser = etree.XMLParser(dtd_validation=True)
-    tree = etree.parse(f'data/{xml_file}', parser)
+    tree = etree.parse(f'{xml_file}', parser)
     dict = xmltodict.parse(etree.tostring(tree))
     len_dict = len(dict['FILE']['RECORD'])
     logger.debug(f'Total de documentos em {xml_file}: {len_dict}')
@@ -65,9 +70,12 @@ def inverted_index(list_xml,file):
         df['ABSTRACT'] = df['ABSTRACT'].apply(lambda x: remove_punct(str(x)))
         df['ABSTRACT'] = df['ABSTRACT'].apply(remove_numbers)
         df['ABSTRACT'] = df['ABSTRACT'].apply(word_tokenize)
-        df['ABSTRACT'] = df['ABSTRACT'].apply(lemmatizer)
         df['ABSTRACT'] = df['ABSTRACT'].apply(remove_stop_words)
         df['ABSTRACT'] = df['ABSTRACT'].apply(remove_len)
+
+        if(bool_stemmer == True):
+            df['ABSTRACT'] = df['ABSTRACT'].apply(stemming) 
+
         df['ABSTRACT'] = df['ABSTRACT'].apply(upper)
 
         for recordnum, abstract in zip(df['RECORDNUM'], df['ABSTRACT']):
@@ -78,6 +86,11 @@ def inverted_index(list_xml,file):
 
     len_invertedIndex = len(invertedIndex)
     logger.debug(f'Total de tokens na lista invertida: {len_invertedIndex}')
+
+    if(bool_stemmer == True):
+        file += '-STEMMER'
+    else:
+        file += '-NOSTEMMER'
 
     logger.debug(f'Salvando arquivo {file}.csv')
     df_invertedIndex = pd.DataFrame(list(invertedIndex.items()), columns=['TOKEN', 'LIST_DOCUMENTS'])
@@ -103,10 +116,10 @@ def remove_len(tokens):
     ft = [t for t in tokens if len(t)>=5] 
     return ft
 
-# Lemmatization
-def lemmatizer(tokens):
-    lt = [WordNetLemmatizer().lemmatize(t) for t in tokens]
-    return lt
+# Porter Stemming
+def stemming(tokens):
+    st = [PorterStemmer().stem(t) for t in tokens]
+    return st
 
 # Upper
 def upper(tokens):
