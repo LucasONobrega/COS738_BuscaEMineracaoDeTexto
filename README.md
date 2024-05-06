@@ -10,6 +10,7 @@ O trabalho consiste na criação de um sistema de recuperação da informação 
 - **Gerador de Lista Invertida**: A função desse módulo é criar as listas invertidas simples.
 - **Indexador**: A função desse módulo é criar o modelo vetorial, dadas as listas invertidas simples.
 - **Buscador**: O objetivo desse módulo é obter os resultados de um conjunto de buscas em um modelo salvo.
+- **Avaliação**: O objetivo desse múdulo é avaliar o sistema de recuperação de informação.
 
 ## Como Usar
 
